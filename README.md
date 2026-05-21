@@ -627,6 +627,177 @@ discord-listener/
 
 ---
 
+## Windows Installation Guide
+
+### Prerequisites
+
+1. **Node.js 18+** — Download LTS from https://nodejs.org
+2. **Git** — Download from https://git-scm.com/download/win
+3. **A code editor** (optional) — VS Code recommended
+
+### Step 1: Clone & Install
+
+Open **PowerShell** or **Command Prompt**:
+
+```powershell
+git clone https://github.com/yunus-0x/meridian
+cd meridian
+npm install
+```
+
+> If `npm install` fails on `@meteora-ag/dlmm`, try running PowerShell as Administrator.
+
+### Step 2: Configure
+
+```powershell
+npm run setup
+```
+
+The wizard will create `.env` and `user-config.json`. You'll need:
+- **Solana wallet private key** (base58 format — export from Phantom/Solflare)
+- **RPC URL** — Get free from https://helius.xyz
+- **OpenRouter API key** — Get from https://openrouter.ai (or use local model)
+- **Telegram bot token** (optional) — Create via @BotFather
+
+### Step 3: Run
+
+```powershell
+# Dry run (no real transactions — test first!)
+npm run dev
+
+# Live mode (real money!)
+npm start
+```
+
+### Using PM2 on Windows (Optional)
+
+PM2 works on Windows but requires additional setup:
+
+```powershell
+npm install -g pm2
+npm install -g pm2-windows-startup
+pm2-startup install
+npm run pm2:start
+pm2 save
+```
+
+### Windows-Specific Notes
+
+- Use **PowerShell** (not CMD) for best compatibility
+- If you see `node-gyp` errors, install Windows Build Tools:
+  ```powershell
+  npm install -g windows-build-tools
+  ```
+- File paths use `\` on Windows — the agent handles this automatically
+- For LM Studio (local LLM), download from https://lmstudio.ai — works natively on Windows
+
+---
+
+## Strategy: Starting with 0.5 SOL
+
+### Can I start with 0.5 SOL?
+
+**Yes**, but it requires careful configuration. Default settings expect more capital.
+
+### Recommended Config for 0.5 SOL
+
+Create or edit `user-config.json`:
+
+```json
+{
+  "deployAmountSol": 0.25,
+  "maxPositions": 1,
+  "minSolToOpen": 0.3,
+  "maxDeployAmount": 0.3,
+  "gasReserve": 0.1,
+  "positionSizePct": 0.5,
+
+  "strategy": "spot",
+  "minBinsBelow": 25,
+  "maxBinsBelow": 35,
+  "defaultBinsBelow": 25,
+
+  "timeframe": "5m",
+  "category": "trending",
+  "minTvl": 5000,
+  "maxTvl": 50000,
+  "minVolume": 1000,
+  "minOrganic": 70,
+  "minHolders": 1000,
+  "minMcap": 200000,
+  "maxMcap": 5000000,
+  "minBinStep": 80,
+  "maxBinStep": 100,
+  "minFeeActiveTvlRatio": 0.1,
+  "minTokenFeesSol": 50,
+
+  "outOfRangeWaitMinutes": 15,
+  "stopLossPct": -20,
+  "takeProfitPct": 10,
+  "trailingTakeProfit": true,
+  "trailingTriggerPct": 5,
+  "trailingDropPct": 2,
+
+  "managementIntervalMin": 5,
+  "screeningIntervalMin": 60,
+  "minClaimAmount": 1,
+  "autoSwapAfterClaim": true
+}
+```
+
+### Why These Settings?
+
+| Setting | Default | 0.5 SOL | Reason |
+|---------|---------|---------|--------|
+| `deployAmountSol` | 0.5 | 0.25 | Leave room for gas + fees |
+| `maxPositions` | 3 | 1 | Can only afford 1 position |
+| `minSolToOpen` | 0.55 | 0.3 | Allow opening with small balance |
+| `gasReserve` | 0.2 | 0.1 | Tighter, but sufficient |
+| `positionSizePct` | 0.35 | 0.5 | Use more of available balance |
+| `minBinsBelow` | 35 | 25 | Tighter range = more fees |
+| `maxBinsBelow` | 69 | 35 | Less downside exposure |
+| `minFeeActiveTvlRatio` | 0.05 | 0.1 | Only high-fee pools |
+| `minTvl` | 10000 | 5000 | More pool options |
+| `maxTvl` | 150000 | 50000 | Avoid whale-dominated pools |
+| `stopLossPct` | -50 | -20 | Protect capital faster |
+| `takeProfitPct` | 5 | 10 | Lock in gains earlier |
+| `managementIntervalMin` | 10 | 5 | Monitor more frequently |
+| `screeningIntervalMin` | 30 | 60 | Screen less often (only 1 position) |
+| `minClaimAmount` | 5 | 1 | Claim smaller amounts |
+| `autoSwapAfterClaim` | false | true | Auto-compound fees to SOL |
+
+### 0.5 SOL Strategy Tips
+
+1. **Start with DRY_RUN=true** — Run for 2-3 days to verify behavior
+2. **One position at a time** — Focus capital on the best opportunity
+3. **Tighter range** (25-35 bins) — More fees per trade, less downside
+4. **Higher fee threshold** (0.1% fee/TVL) — Only deploy into high-yield pools
+5. **Faster management** (5 min cycles) — React quickly to price moves
+6. **Auto-compound** — Claim fees and swap to SOL automatically
+7. **Strict stop-loss** (-20%) — Cut losses early, preserve capital
+8. **Lower TVL range** ($5k-$50k) — Less competition, higher individual yield
+9. **Monitor closely first week** — Watch Telegram notifications, adjust if needed
+
+### Expected Returns (Conservative)
+
+With 0.5 SOL in a good pool:
+- **Daily fees**: 0.005-0.02 SOL (1-4% daily yield on deployed capital)
+- **Monthly**: ~0.15-0.6 SOL (30-120% APR on deployed capital)
+- **Compounding**: Fees auto-swapped to SOL, increases position over time
+
+> These are estimates. Actual returns depend on pool quality, market conditions, and how well the agent manages positions. You can lose money.
+
+### Growing from 0.5 SOL
+
+Once you've built confidence and accumulated more SOL:
+1. Increase `deployAmountSol` gradually
+2. Increase `maxPositions` to 2-3
+3. Widen `minBinsBelow`/`maxBinsBelow` range
+4. Lower `minFeeActiveTvlRatio` to access more pools
+5. Consider enabling Discord signals for more opportunities
+
+---
+
 ## Disclaimer
 
 This software is provided as-is, with no warranty. Running an autonomous trading agent carries real financial risk — you can lose funds. Always start with `DRY_RUN=true` to verify behavior before going live. Never deploy more capital than you can afford to lose. This is not financial advice.
