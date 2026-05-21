@@ -227,3 +227,29 @@ Agent Meridian HiveMind sync is handled by `hivemind.js`. It uses built-in Agent
 
 - `lessons.js evolveThresholds()` evolves `maxVolatility` + `minFeeActiveTvlRatio` (fixed from `minFeeTvlRatio`). Both keys now exist in config.js and are properly applied.
 - `get_wallet_positions` tool (dlmm.js) is in definitions.js but not in MANAGER_TOOLS or SCREENER_TOOLS — only available in GENERAL role.
+
+---
+
+## LP Army Strategies (lparmy.com)
+
+7 strategies from LP Army community integrated into the strategy library:
+
+| Strategy | Author | Best For |
+|----------|--------|----------|
+| `bid_ask_bounce` | MichaelZogot | Volatile tokens at support zones |
+| `fibonacci_range` | Jajajak.sats | Systematic range via Fib levels (60+ SOL profits) |
+| `bear_market_accumulation` | LP Army Collective | SOL accumulation during bear |
+| `bear_market_daily_yield` | Bojjifomo | Newbie-friendly bear market DLMM |
+| `deep_winter_sol_stacking` | MichaelZogot | Long-term positioning for next bull |
+| `bid_ask_flip` | Jaypee | Active flips on strong tokens |
+| `bear_market_majors_lp` | Mikus | Safe yield on SOL/BTC majors |
+
+### Market Regime Detection
+
+Config section: `marketRegime`
+- `enabled`: false by default — set true to auto-detect bear/bull
+- `mode`: "manual" | "auto" — auto switches strategy based on SOL price
+- `currentRegime`: "bear" | "bull" | "neutral"
+- `bearStrategy` / `bullStrategy` / `neutralStrategy`: strategy IDs for each regime
+- `solPriceChangeThreshold`: -20% to trigger bear
+- `solPriceRecoveryThreshold`: +15% to trigger bull
