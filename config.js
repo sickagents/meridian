@@ -91,6 +91,18 @@ export const config = {
     athFilterPct:       u.athFilterPct       ?? null, // e.g. -20 = only deploy if price is >= 20% below ATH
   },
 
+  // ─── Market Regime Detection ─────────────
+  marketRegime: {
+    enabled: u.marketRegimeEnabled ?? false, // auto-detect bear/bull and adjust strategy
+    mode: u.marketRegimeMode ?? "manual", // "manual" | "auto" — auto switches strategy based on market
+    currentRegime: u.currentRegime ?? "neutral", // "bear" | "bull" | "neutral"
+    bearStrategy: u.bearStrategy ?? "bear_market_accumulation", // strategy to use in bear market
+    bullStrategy: u.bullStrategy ?? "bid_ask_bounce", // strategy to use in bull market
+    neutralStrategy: u.neutralStrategy ?? "custom_ratio_spot", // strategy for neutral market
+    solPriceChangeThreshold: u.solPriceChangeThreshold ?? -20, // % drop to trigger bear regime
+    solPriceRecoveryThreshold: u.solPriceRecoveryThreshold ?? 15, // % rise to trigger bull regime
+  },
+
   // ─── Position Management ────────────────
   management: {
     minClaimAmount:        u.minClaimAmount        ?? 5,

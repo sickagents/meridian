@@ -89,6 +89,199 @@ const DEFAULT_STRATEGIES = {
     exit: { take_profit_pct: 10, notes: "When total return >= 10% of deployed capital: withdraw_liquidity(bps=5000) to take 50% off. Remaining 50% keeps running. Repeat at next threshold." },
     best_for: "Locking in profits without fully exiting winning positions",
   },
+  // ─── LP Army Strategies ────────────────────────────────────────
+  bid_ask_bounce: {
+    id: "bid_ask_bounce",
+    name: "Bid-Ask Bounce Play",
+    author: "MichaelZogot (LP Army)",
+    lp_strategy: "bid_ask",
+    token_criteria: {
+      min_mcap: 150000,
+      min_holders: 100,
+      min_tvl: 10000,
+      min_volume_24h: 5000,
+      notes: "Tokens with strong narrative and active trading volume. Prefer tokens near support zones. Avoid tokens with high bundler concentration.",
+    },
+    entry: {
+      condition: "Deploy single-sided SOL bid-ask when token is near a support zone or showing bounce signals. Remove auto-fill and manually adjust bins to concentrate at support levels.",
+      single_side: "SOL",
+      notes: "All bins below active bin. SOL enters as price drops through bins, buying token at each level. When price bounces back up, token is sold for SOL at each bin, earning swap fees. Classic bid-ask flip.",
+    },
+    range: {
+      type: "custom",
+      bins_below_pct: 100,
+      bins_above_pct: 0,
+      notes: "Full bid-ask: all bins below active bin. Wider range = more DCA layers but slower flip. Tighter range = faster flip but less DCA depth. Adjust based on volatility.",
+    },
+    exit: {
+      take_profit_pct: 5,
+      stop_loss_pct: -30,
+      notes: "Close when position flips fully to token side and price recovers (TP). Or close if token drops below stop loss. Re-deploy at new price level if token still has narrative.",
+    },
+    best_for: "Earning fees on volatile tokens via bid-ask flip. Works best on tokens with strong support zones and active trading volume.",
+  },
+  fibonacci_range: {
+    id: "fibonacci_range",
+    name: "Fibonacci Range Selection",
+    author: "Jajajak.sats (LP Army)",
+    lp_strategy: "bid_ask",
+    token_criteria: {
+      min_mcap: 300000,
+      min_holders: 200,
+      min_tvl: 15000,
+      notes: "Tokens with clear price action and Fibonacci levels. Works best on tokens with established trading history. Use with Supertrend/BB/MACD/RSI for confirmation.",
+    },
+    entry: {
+      condition: "Identify key Fibonacci retracement levels (0.382, 0.5, 0.618) from recent swing high/low. Deploy bid-ask with bins concentrated at Fib support levels.",
+      single_side: "SOL",
+      notes: "Use Fibonacci retracement tool to identify support zones. Concentrate bins at 0.382, 0.5, and 0.618 levels. This creates natural DCA layers at historically significant price levels.",
+    },
+    range: {
+      type: "fibonacci",
+      fib_levels: [0.382, 0.5, 0.618],
+      notes: "Range spans from 0.786 retracement (deepest support) to current price. Bin density concentrated at 0.382-0.618 zone where most bounces occur.",
+    },
+    exit: {
+      take_profit_pct: 8,
+      notes: "Close when price bounces to 0.236 or 0 (swing high) level. Or when fees earned exceed target. Re-deploy at new Fib levels after close.",
+    },
+    best_for: "Systematic range selection using Fibonacci levels. Proven to generate 60+ SOL profits across multiple wallets. Works with any technical indicator combo.",
+  },
+  bear_market_accumulation: {
+    id: "bear_market_accumulation",
+    name: "Bear Market SOL Accumulation",
+    author: "LP Army Collective",
+    lp_strategy: "bid_ask",
+    token_criteria: {
+      min_mcap: 500000,
+      min_holders: 100,
+      min_tvl: 10000,
+      notes: "Focus on tokens with strong fundamentals that survive bear markets. Avoid low-cap memecoins. Prefer tokens with real utility or strong community.",
+    },
+    entry: {
+      condition: "Deploy bid-ask positions during bear market. Use DLMM as DCA mechanism to accumulate SOL while earning fees. Focus on tokens that hold value during market downturns.",
+      single_side: "SOL",
+      notes: "Bear market = accumulation phase. Deploy SOL-side bid-ask to buy tokens at discount prices. Earn fees from the volatility of the downtrend. Goal: lower cost basis to almost nothing.",
+    },
+    range: {
+      type: "wide",
+      bins_below_pct: 80,
+      bins_above_pct: 20,
+      notes: "Wider range during bear markets to capture more price movement. 80% below for DCA buying, 20% above for fee earning on bounces.",
+    },
+    exit: {
+      take_profit_pct: 15,
+      notes: "Longer hold periods in bear market. Close only when: (1) position is profitable and fees are good, (2) token fundamentals deteriorate, (3) market shows signs of reversal and better opportunities exist.",
+    },
+    best_for: "Accumulating SOL during bear markets. Treat LP like a business, not trading. Stay calm during nukes. Use volatility to lower cost basis.",
+  },
+  bear_market_daily_yield: {
+    id: "bear_market_daily_yield",
+    name: "Bear Market Daily Yield",
+    author: "Bojjifomo (LP Army)",
+    lp_strategy: "bid_ask",
+    token_criteria: {
+      min_mcap: 500000,
+      min_holders: 100,
+      min_tvl: 10000,
+      min_volume_24h: 5000,
+      notes: "Newbie-friendly bear market strategy. Focus on tokens with consistent daily volume. Bear season in DLMM is different from spot - volume still exists for fee capture.",
+    },
+    entry: {
+      condition: "Deploy during bear market on tokens with active daily volume. DLMM works differently from spot trading - bear seasons have happened 3-4 times for memecoins but DLMM still generates fees.",
+      single_side: "SOL",
+      notes: "Entry is straightforward - find tokens with daily volume > $5K and deploy bid-ask. The key insight: bear market for memecoins != bear market for DLMM. Volume still exists.",
+    },
+    range: {
+      type: "default",
+      notes: "Standard range. Let the agent's volatility-based bin calculation handle the range. Focus on execution, not range optimization.",
+    },
+    exit: {
+      min_fee_per_tvl_24h: 7,
+      notes: "Close when daily yield drops below 7% fee/TVL. Or when token volume dies completely. Re-deploy on next active token.",
+    },
+    best_for: "Consistent daily yield generation during bear markets. Perfect for newcomers to DLMM LPing. Focus on volume, not price direction.",
+  },
+  deep_winter_sol_stacking: {
+    id: "deep_winter_sol_stacking",
+    name: "Deep Winter SOL Stacking",
+    author: "MichaelZogot (LP Army)",
+    lp_strategy: "bid_ask",
+    token_criteria: {
+      min_mcap: 1000000,
+      min_holders: 500,
+      min_tvl: 50000,
+      notes: "Only high-conviction tokens with strong fundamentals. This is a long-term positioning strategy for the next bull market (2028/29). Focus on SOL and BTC pairs.",
+    },
+    entry: {
+      condition: "Deploy during early bear market. Position for the next bull cycle by stacking SOL through LP fees. Use the volatility of the downtrend to accumulate.",
+      single_side: "SOL",
+      notes: "This is the Positioning Phase. The bear market is not the loss phase - it's when you build your stack. Deploy on SOL/BTC pairs and let the volatility work for you.",
+    },
+    range: {
+      type: "wide",
+      bins_below_pct: 70,
+      bins_above_pct: 30,
+      notes: "Wide range for long-term positioning. 70% below for accumulation, 30% above for fee capture on bounces. Don't rebalance frequently - let the position work.",
+    },
+    exit: {
+      take_profit_pct: 25,
+      notes: "Very long hold periods. Close only when: (1) bull market is confirmed and better opportunities exist, (2) position has generated 25%+ return, (3) token fundamentals deteriorate significantly.",
+    },
+    best_for: "Long-term SOL accumulation during bear markets. Position for the next bull cycle. Patience is the edge.",
+  },
+  bid_ask_flip: {
+    id: "bid_ask_flip",
+    name: "Bid-Ask Flip on Strong Tokens",
+    author: "Jaypee (LP Army)",
+    lp_strategy: "bid_ask",
+    token_criteria: {
+      min_mcap: 500000,
+      min_holders: 200,
+      min_tvl: 20000,
+      notes: "Tokens with strong fundamentals and active trading. Focus on tokens that hold value during market downturns. Avoid tokens with high bot holder percentage.",
+    },
+    entry: {
+      condition: "Deploy bid-ask flip positions on tokens with strong fundamentals. Core focus during bear market: bid-ask flip positions on tokens with strong community and active volume.",
+      single_side: "SOL",
+      notes: "Bid-ask flip: SOL enters as price drops, tokens are sold as price recovers. The flip happens naturally as price oscillates. Each flip earns swap fees.",
+    },
+    range: {
+      type: "tight",
+      bins_below_pct: 60,
+      bins_above_pct: 40,
+      notes: "Tighter range for faster flips. 60/40 split favors SOL-side for bear market bias. Adjust ratio based on market sentiment.",
+    },
+    exit: {
+      take_profit_pct: 5,
+      notes: "Quick flips. Close when position flips and earns target profit. Re-deploy immediately on same or different token. Compound gains by increasing position size.",
+    },
+    best_for: "Active bear market strategy. Flip positions on strong tokens to generate consistent returns. Works best with high-volume tokens.",
+  },
+  bear_market_majors_lp: {
+    id: "bear_market_majors_lp",
+    name: "Bear Market Majors LP",
+    author: "Mikus (LP Army)",
+    lp_strategy: "bid_ask",
+    token_criteria: {
+      pair_requirements: ["SOL/USDC", "BTC/USDC", "SOL/USDT"],
+      min_tvl: 100000,
+      notes: "LP majors like SOL and BTC during bear markets. These pairs have the highest volume and most consistent fee generation. Best strategy for bear market period.",
+    },
+    entry: {
+      condition: "Deploy on SOL/BTC major pairs during bear market. Use DLMM to LP these pairs and earn fees from the high trading volume.",
+      notes: "Majors have the most consistent volume even in bear markets. SOL and BTC pairs generate reliable fees. This is the safest bear market LP strategy.",
+    },
+    range: {
+      type: "default",
+      notes: "Standard range for major pairs. Let the agent's volatility-based calculation handle the range. Focus on execution.",
+    },
+    exit: {
+      min_fee_per_tvl_24h: 5,
+      notes: "Close when yield drops below 5% fee/TVL. Major pairs are lower yield but more consistent. Re-deploy on same pair.",
+    },
+    best_for: "Safe, consistent yield during bear markets. LP majors for reliable fee generation. Lower yield but higher safety.",
+  },
 };
 
 function ensureDefaultStrategies() {

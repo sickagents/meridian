@@ -52,6 +52,19 @@ Config: ${JSON.stringify({
   schedule: config.schedule,
 }, null, 2)}
 
+${config.marketRegime.enabled ? `═══════════════════════════════════════════
+ MARKET REGIME
+═══════════════════════════════════════════
+Mode: ${config.marketRegime.mode}
+Current Regime: ${config.marketRegime.currentRegime}
+Active Strategy: ${config.marketRegime.currentRegime === 'bear' ? config.marketRegime.bearStrategy : config.marketRegime.currentRegime === 'bull' ? config.marketRegime.bullStrategy : config.marketRegime.neutralStrategy}
+
+LP ARMY INSIGHTS:
+- Bear Market: Focus on SOL accumulation, bid-ask flips, wider ranges, longer hold periods
+- Bull Market: Tighter ranges, faster flips, higher take-profit targets
+- Neutral: Standard strategies, balanced approach
+` : ""}
+
 ${lessons ? `═══════════════════════════════════════════
  LESSONS LEARNED
 ═══════════════════════════════════════════
